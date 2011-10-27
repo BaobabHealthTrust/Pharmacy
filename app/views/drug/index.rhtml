@@ -1,0 +1,75 @@
+<script>
+  var tt_cancel_destination = '/logout'; 
+</script>
+<div id="general_dashboard">
+  <div style="display: table; width: 100%; border-spacing: 10px;">
+    <div style="display: table-row">
+      <div style="display: table-cell; text-align: center; border: 1px #333 solid; 
+           -moz-border-radius: 20px; background-color: #eef;">
+        <h2 style="color: #333; font-size: 2.0em; font-weight: normal;">
+          Pharmacy Drug Management
+        </h2>
+      </div>
+    </div>
+    <div style="display: table-row">
+      <div style="display: table-cell; text-align: center; border: 1px #333 solid; 
+           height: 540px; -moz-border-radius: 20px;">
+        <div style="display: table; width: 100%;">
+          <div style="display: table-row">
+            <div style="display: table-cell; vertical-align: top; width: 50%;">
+              <h3 style="font-size: 2em; color: #333; font-weight: normal;">
+                Select Task
+              </h3>
+            </div>
+            <div style="display: table-cell; width: 50%;">
+              <table cellspacing="20" style="margin-top: 10px;">
+                <tr>
+                  <td style="height: 60px;">
+                    <button  class="btn" style=" width: 400px;" onmousedown="window.location='/drug/delivery'">
+                      New Stock
+                    </button>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="height: 60px;">
+                    <button  class="btn" style=" width: 400px;" onmousedown="window.location='/drug/edit_stock'">
+                      Edit Stock
+                    </button>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="height: 60px;">
+                    <button  class="btn" style=" width: 400px;" onmousedown="window.location='/drug/expiring'">
+                      Expiring Drugs
+                    </button>                   
+                  </td>
+                </tr>
+                <tr>
+                  <td style="height: 60px;">
+                    <button  class="btn" style=" width: 400px;" onmousedown="window.location='/drug/removed_from_shelves'">
+                      Removed from Shelves
+                    </button>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="height: 60px;">
+                    <button  class="btn" style=" width: 400px;" onmousedown="window.location='/drug/date_select'">
+                      Stock Report
+                    </button>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="height: 60px;">
+                    <button  class="btn" style=" width: 400px;" onmousedown="window.location='/drug/print_barcode'">
+                      Print Barcode
+                    </button>
+                  </td>
+                </tr>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
