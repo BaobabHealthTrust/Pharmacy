@@ -40,7 +40,7 @@ class DrugController < ApplicationController
       date = encounter_datetime || Date.today 
       Pharmacy.drug_dispensed_stock_adjustment(drug_id,pills,date,edit_reason)
       #flash[:notice] = "#{params[:drug_name]} successfully edited"
-      redirect_to "/clinic"   # /management"
+      redirect_to "/drug"   # /management"
     end
   end
 
@@ -48,8 +48,8 @@ class DrugController < ApplicationController
     @start_date = params[:start_date].to_date
     @end_date = params[:end_date].to_date
 
-#TODO
-#need to redo the SQL query
+    #TODO
+    #need to redo the SQL query
     @stock = {}
     ids = Pharmacy.active.find(:all).collect{|p|p.drug_id} rescue []
     Drug.find(:all,:conditions =>["drug_id IN (?)",ids]).each do | drug |
@@ -57,7 +57,15 @@ class DrugController < ApplicationController
       @stock[drug.name]["prescribed"] = Pharmacy.prescribed_drugs_since(drug.id, @start_date , @end_date)
       @stock[drug.name]["current_stock"] = Pharmacy.current_stock_as_from(drug.id, Pharmacy.first_delivery_date(drug.id) , @end_date)
       @stock[drug.name]["dispensed"] = Pharmacy.dispensed_drugs_since(drug.id, @start_date , @end_date)
-      @stock[drug.name]["consumption_per"] = sprintf('%.2f',((@stock[drug.name]["dispensed"].to_f / @stock[drug.name]["current_stock"].to_f) * 100.to_f)).to_s + " %" rescue "0 %"
+      
+      if ((@stock[drug.name]["current_stock"].to_f + 
+              @stock[drug.name]["dispensed"].to_f) * 100.to_f) > 0
+        @stock[drug.name]["consumption_per"] = sprintf('%.2f',
+          ((@stock[drug.name]["dispensed"].to_f / (@stock[drug.name]["current_stock"].to_f + 
+                  @stock[drug.name]["dispensed"].to_f)) * 100.to_f)).to_s + " %" rescue "0.00 %"
+      else
+        @stock[drug.name]["consumption_per"] = "0.00 %"
+      end
     end rescue []
     render :layout => "menu" 
   end
@@ -76,39 +84,39 @@ class DrugController < ApplicationController
   end
   
   def print
-      pill_count = params[:quantity]
-      drug = Drug.find(params[:drug_id])
-      drug_name = drug.name
-      drug_name1=""
-      drug_name2=""
-      drug_quantity = pill_count
-      drug_barcode = "#{drug.id}-#{drug_quantity}"
-      drug_string_length =drug_name.length
+    pill_count = params[:quantity]
+    drug = Drug.find(params[:drug_id])
+    drug_name = drug.name
+    drug_name1=""
+    drug_name2=""
+    drug_quantity = pill_count
+    drug_barcode = "#{drug.id}-#{drug_quantity}"
+    drug_string_length =drug_name.length
 
-      if drug_name.length > 27
-        drug_name1 = drug_name[0..25]
-        drug_name2 = drug_name[26..-1]
-      end
+    if drug_name.length > 27
+      drug_name1 = drug_name[0..25]
+      drug_name2 = drug_name[26..-1]
+    end
 
-      if drug_string_length <= 27
-        label = ZebraPrinter::StandardLabel.new
-        label.draw_text("#{drug_name}", 40, 30, 0, 2, 2, 2, false)
-        label.draw_text("Quantity: #{drug_quantity}", 40, 80, 0, 2, 2, 2,false)
-        label.draw_barcode(40, 130, 0, 1, 5, 15, 120,true, "#{drug_barcode}")
-      else
-        label = ZebraPrinter::StandardLabel.new
-        label.draw_text("#{drug_name1}", 40, 30, 0, 2, 2, 2, false)
-        label.draw_text("#{drug_name2}", 40, 80, 0, 2, 2, 2, false)
-        label.draw_text("Quantity: #{drug_quantity}", 40, 130, 0, 2, 2, 2,false)
-        label.draw_barcode(40, 180, 0, 1, 5, 15, 100,true, "#{drug_barcode}")
-      end
+    if drug_string_length <= 27
+      label = ZebraPrinter::StandardLabel.new
+      label.draw_text("#{drug_name}", 40, 30, 0, 2, 2, 2, false)
+      label.draw_text("Quantity: #{drug_quantity}", 40, 80, 0, 2, 2, 2,false)
+      label.draw_barcode(40, 130, 0, 1, 5, 15, 120,true, "#{drug_barcode}")
+    else
+      label = ZebraPrinter::StandardLabel.new
+      label.draw_text("#{drug_name1}", 40, 30, 0, 2, 2, 2, false)
+      label.draw_text("#{drug_name2}", 40, 80, 0, 2, 2, 2, false)
+      label.draw_text("Quantity: #{drug_quantity}", 40, 130, 0, 2, 2, 2,false)
+      label.draw_barcode(40, 180, 0, 1, 5, 15, 100,true, "#{drug_barcode}")
+    end
     
-      send_data(label.print(1),:type=>"application/label; charset=utf-8", :stream=> false, :filename=>"#{drug_barcode}.lbl", :disposition => "inline")
+    send_data(label.print(1),:type=>"application/label; charset=utf-8", :stream=> false, :filename=>"#{drug_barcode}.lbl", :disposition => "inline")
   end
 
   def expiring
-    @start_date = params[:start_date].to_date
-    @end_date = params[:end_date].to_date
+    @start_date = params[:start_date].to_date rescue nil
+    @end_date = params[:end_date].to_date rescue nil
     @expiring_drugs = Pharmacy.expiring_drugs(@start_date,@end_date)
     render :layout => "menu"
   end
@@ -118,6 +126,13 @@ class DrugController < ApplicationController
     @end_date = params[:end_date].to_date
     @drugs_removed = Pharmacy.removed_from_shelves(@start_date,@end_date)
     render :layout => "menu"
+  end
+
+  def available_name    
+    ids = Pharmacy.active.find(:all).collect{|p|p.drug_id} rescue []
+    @names = Drug.find(:all,:conditions =>["name LIKE ? AND drug_id IN (?)","%" + 
+          params[:search_string] + "%", ids]).collect{|drug| drug.name}
+    render :text => "<li>" + @names.map{|n| n } .join("</li><li>") + "</li>"
   end
 
 end

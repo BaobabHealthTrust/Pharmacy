@@ -51,6 +51,15 @@
   #data_table_length{display:none;}
   #data_table_filter{display:none;}
   #data_table_info{display:none;}
+  
+  .color_red{
+    background-color:#FF3636; /*AliceBlue;*/
+    padding-left:10px;
+    padding-right:10px;
+    color: #fff;
+    font-weight: bold;
+  }
+
 </style>
 
 <%#= stylesheet_link_tag "data_table" %>
@@ -87,16 +96,21 @@
     <%color = "blue"
     count = 1
     original_form_count = 0
-    @stock.each{|name,values|
+    @stock.each{|name,values|      
       if color == "blue"
         color = "white"
       else
         color = "blue"
       end
+      
       current_stock = values["current_stock"]
       prescribed = values["prescribed"]
       dispensed = values["dispensed"]
       consumption_per = values["consumption_per"]
+      
+      if current_stock <= 0 
+        color = "red"
+      end      
     %>
       </script>
       <tr>
@@ -108,7 +122,7 @@
       </tr>
       <% count+=1
       original_form_count+=1
-    } unless @stock.blank?%>
+    } # unless @stock.blank?%>
     </tbody>
   </table>
 </div>

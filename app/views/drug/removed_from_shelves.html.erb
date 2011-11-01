@@ -71,7 +71,7 @@ table{
   }
   dataT();
 </script>
-</head>
+<div  id="general_dashboard">
 <h2>Drugs removed</h2><h3>From: <%= @start_date.strftime("%A, %Y %b %d")%> 
 <br/>To: <%=@end_date.strftime("%A, %Y %b %d")%></br></h3>
 <%#= render :partial => "header" %>
@@ -114,8 +114,7 @@ table{
     } unless @drugs_removed.blank?%>
  </tbody>
 </table>
-</html>
-
+</div>
 
 <script>
 dataT();
